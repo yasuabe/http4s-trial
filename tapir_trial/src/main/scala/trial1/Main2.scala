@@ -1,11 +1,10 @@
 package trial1
 
-import cats.data.NonEmptyList._
+import cats.Semigroup
 import cats.data.{Kleisli, NonEmptyList}
 import cats.effect._
 import cats.syntax.either._
 import cats.syntax.functor._
-import cats.syntax.reducible._
 import cats.syntax.semigroupk._
 import org.http4s._
 import org.http4s.implicits._
@@ -39,12 +38,13 @@ object Main2 extends IOApp {
   def goodBye(name: String): IO[Either[Unit, String]] = IO {
     s"Good-bye, $name".asRight[Unit]
   }
+  implicit val routesSemigroup: Semigroup[HttpRoutes[IO]] = _ combineK _
 
   val greetingService: Kleisli[IO, Request[IO], Response[IO]] = NonEmptyList.of(
     helloEP toRoutes hello,
     hiEP    toRoutes hi,
     byeEP   toRoutes goodBye
-  ).reduceLeftTo(identity)(_ combineK _) orNotFound
+  ).reduce orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO]
