@@ -12,14 +12,15 @@ import org.http4s.implicits._
 import tapir._
 import tapir.server.http4s._
 
-object Main extends IOApp {
+object Main0 extends IOApp {
 
-  val helloWorldService0 = HttpRoutes.of[IO] {
-    case GET -> Root / "hello" / name =>
-      Ok(s"Hello, $name.")
-  }.orNotFound
+  val helloWorldServiceOrg: Kleisli[IO, Request[IO], Response[IO]] =
+    HttpRoutes.of[IO] {
+      case GET -> Root / "hello" / name =>
+        Ok(s"Hello, $name.")
+    }.orNotFound
 
-  val helloWorldEP =
+  val helloWorldEP: Endpoint[String, Unit, String, Nothing] =
     endpoint.get.in("hello" / path[String]("name")).out(stringBody)
 
   def hello(name: String): IO[Either[Unit, String]] = IO {
