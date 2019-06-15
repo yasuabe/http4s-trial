@@ -25,26 +25,26 @@ object Main1 extends IOApp {
 
   val byeEP: Endpoint[String, Unit, String, Nothing] =
     endpoint.get
-      .in("good-bye" / path[String]("name"))
+      .in("bye" / path[String]("name"))
       .out(stringBody)
 
   def hello(name: String): IO[Either[Unit, String]] = IO {
-    s"Hello, $name".asRight[Unit]
+    s"Hello, $name!".asRight[Unit]
   }
   def hi(name: String): IO[Either[Unit, String]] = IO {
-    s"Hi, $name".asRight[Unit]
+    s"Hi, $name!".asRight[Unit]
   }
-  def goodBye(name: String): IO[Either[Unit, String]] = IO {
-    s"Good-bye, $name".asRight[Unit]
+  def bye(name: String): IO[Either[Unit, String]] = IO {
+    s"Bye, $name!".asRight[Unit]
   }
-  val helloRoute:   HttpRoutes[IO] = helloEP toRoutes hello
-  val hiRoute:      HttpRoutes[IO] = hiEP    toRoutes hi
-  val goodByeRoute: HttpRoutes[IO] = byeEP   toRoutes goodBye
+  val helloRoute: HttpRoutes[IO] = helloEP toRoutes hello
+  val hiRoute:    HttpRoutes[IO] = hiEP    toRoutes hi
+  val byeRoute:   HttpRoutes[IO] = byeEP   toRoutes bye
 
-  val greetingService: Kleisli[IO, Request[IO], Response[IO]] =
+  val greetingService: HttpApp[IO] =
     helloRoute   combineK
     hiRoute      combineK
-    goodByeRoute orNotFound
+    byeRoute orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO]
