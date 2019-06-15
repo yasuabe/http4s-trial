@@ -1,26 +1,23 @@
-package trial.tapir.swagger
+package trial1
 
 import cats.Semigroup
 import cats.data.NonEmptyList
-import cats.syntax.functor._
+import cats.effect._
 import cats.syntax.either._
+import cats.syntax.functor._
 import cats.syntax.semigroupk._
-import cats.effect.{ExitCode, IO, IOApp}
-import org.http4s.HttpRoutes
-import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s._
 import org.http4s.implicits._
-import tapir.EndpointInput.PathCapture
+import org.http4s.server.blaze.BlazeServerBuilder
 import tapir._
-import tapir.openapi.OpenAPI
 import tapir.server.http4s._
-import tapir.docs.openapi._
+import EndpointInput.PathCapture
 
-object Main extends IOApp {
-  val nameParam: PathCapture[String] =
-    path[String]("name").description("名前").example("World")
+object Main3 extends IOApp {
+  val nameParam: PathCapture[String] = path[String]("name")
 
   val greetEP: Endpoint[Unit, Unit, String, Nothing] =
-    endpoint.get.out(stringBody.example("Hello, World!"))
+    endpoint.get.out(stringBody)
 
   val helloEP: Endpoint[String, Unit, String, Nothing] =
     greetEP.in("hello" / nameParam)
@@ -32,31 +29,28 @@ object Main extends IOApp {
     greetEP.in("bye" / nameParam)
 
   def hello(name: String): IO[Either[Unit, String]] = IO {
-    s"Hello, $name!".asRight[Unit]
+    s"Hello, $name".asRight[Unit]
   }
   def hi(name: String): IO[Either[Unit, String]] = IO {
-    s"Hi, $name!".asRight[Unit]
+    s"Hi, $name".asRight[Unit]
   }
-  def goodBye(name: String): IO[Either[Unit, String]] = IO {
-    s"Bye, $name!".asRight[Unit]
+  def bye(name: String): IO[Either[Unit, String]] = IO {
+    s"Bye, $name".asRight[Unit]
   }
-  val api: OpenAPI = List(helloEP, hiEP, byeEP).toOpenAPI("http4s × tapir × Swagger", "1.0")
-
   implicit val routesSemigroup: Semigroup[HttpRoutes[IO]] = _ combineK _
 
-  val greetingService: HttpRoutes[IO] = NonEmptyList.of(
+  val greetingService: HttpApp[IO] = NonEmptyList.of(
     helloEP toRoutes hello,
     hiEP    toRoutes hi,
-    byeEP   toRoutes goodBye
-  ).reduce
+    byeEP   toRoutes bye
+  ).reduce orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO]
       .bindHttp(8080, "localhost")
-      .withHttpApp(greetingService combineK SwaggerUI[IO](api) orNotFound)
+      .withHttpApp(greetingService)
       .serve
       .compile
       .drain
       .as(ExitCode.Success)
 }
-

@@ -26,24 +26,24 @@ object Main2 extends IOApp {
 
   val byeEP: Endpoint[String, Unit, String, Nothing] =
     endpoint.get
-    .in("good-bye" / path[String]("name"))
+    .in("bye" / path[String]("name"))
     .out(stringBody)
 
   def hello(name: String): IO[Either[Unit, String]] = IO {
-    s"Hello, $name".asRight[Unit]
+    s"Hello, $name!".asRight[Unit]
   }
   def hi(name: String): IO[Either[Unit, String]] = IO {
-    s"Hi, $name".asRight[Unit]
+    s"Hi, $name!".asRight[Unit]
   }
-  def goodBye(name: String): IO[Either[Unit, String]] = IO {
-    s"Good-bye, $name".asRight[Unit]
+  def bye(name: String): IO[Either[Unit, String]] = IO {
+    s"Bye, $name!".asRight[Unit]
   }
   implicit val routesSemigroup: Semigroup[HttpRoutes[IO]] = _ combineK _
 
-  val greetingService: Kleisli[IO, Request[IO], Response[IO]] = NonEmptyList.of(
+  val greetingService: HttpApp[IO] = NonEmptyList.of(
     helloEP toRoutes hello,
     hiEP    toRoutes hi,
-    byeEP   toRoutes goodBye
+    byeEP   toRoutes bye
   ).reduce orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
