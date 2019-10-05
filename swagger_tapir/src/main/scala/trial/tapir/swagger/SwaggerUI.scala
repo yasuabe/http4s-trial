@@ -2,16 +2,15 @@ package trial.tapir.swagger
 
 import cats.Monad
 import cats.syntax.option._
-import cats.effect.{ContextShift, Sync}
+import cats.effect.{Blocker, ContextShift, Sync}
 import org.http4s.{HttpRoutes, StaticFile, _}
 import org.http4s.dsl.Http4sDsl
 import org.webjars.WebJarAssetLocator
 import tapir.openapi.OpenAPI
 import tapir.openapi.circe.yaml._
-import scala.concurrent.ExecutionContext
 
 class SwaggerUI[F[_]: Monad: Sync](
-  openApi: OpenAPI, ec: ExecutionContext
+  openApi: OpenAPI, bl: Blocker
 )(implicit cs: ContextShift[F]) extends Http4sDsl[F] {
   private val prefix = "swagger-ui"
   private val path   = Path(prefix)
@@ -22,7 +21,7 @@ class SwaggerUI[F[_]: Monad: Sync](
           { v => s"/META-INF/resources/webjars/swagger-ui/$v/" }
 
   private def static(name: String, req: Request[F]) =
-    StaticFile.fromResource(name, ec, req.some) getOrElseF NotFound()
+    StaticFile.fromResource(name, bl, req.some) getOrElseF NotFound()
 
   val service: HttpRoutes[F] = org.http4s.HttpRoutes.of[F] {
     case _   @ GET -> Path("swagger.yaml")  => Ok(openApi.toYaml)
@@ -32,7 +31,6 @@ class SwaggerUI[F[_]: Monad: Sync](
 }
 object SwaggerUI {
   def apply[F[_]: Sync](
-    openApi: OpenAPI,
-    ec:      ExecutionContext = ExecutionContext.global
-  )(implicit cs: ContextShift[F]): HttpRoutes[F] = new SwaggerUI[F](openApi, ec).service
+    openApi: OpenAPI, bl: Blocker
+  )(implicit cs: ContextShift[F]): HttpRoutes[F] = new SwaggerUI[F](openApi, bl).service
 }
