@@ -5,7 +5,8 @@ import cats.data.NonEmptyList
 import cats.syntax.functor._
 import cats.syntax.either._
 import cats.syntax.semigroupk._
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{Blocker, ExitCode, IO, IOApp}
+import fs2.Stream
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
@@ -51,11 +52,12 @@ object Main extends IOApp {
   ).reduce
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
-      .bindHttp(8080, "localhost")
-      .withHttpApp(greetingService combineK SwaggerUI[IO](api) orNotFound)
-      .serve
-      .compile
+    Stream.resource(Blocker[IO]).flatMap { bl: Blocker =>
+      BlazeServerBuilder[IO]
+        .bindHttp(8080, "localhost")
+        .withHttpApp(greetingService combineK SwaggerUI[IO](api, bl) orNotFound)
+        .serve
+    } .compile
       .drain
       .as(ExitCode.Success)
 }
