@@ -2,14 +2,14 @@ package trial1
 
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.either._
-import cats.syntax.functor._
 import org.http4s.dsl.impl.Root
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.{HttpApp, HttpRoutes}
-import tapir._
-import tapir.server.http4s._
+import sttp.tapir._
+import sttp.tapir.server.http4s._
+import scala.concurrent.ExecutionContext.global
 
 object Main0 extends IOApp {
 
@@ -32,7 +32,7 @@ object Main0 extends IOApp {
     helloWorldRoute orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
+    BlazeServerBuilder[IO](global)
       .bindHttp(8080, "localhost")
       .withHttpApp(helloWorldService)
       .serve

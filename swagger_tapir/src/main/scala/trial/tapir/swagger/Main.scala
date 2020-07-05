@@ -2,7 +2,6 @@ package trial.tapir.swagger
 
 import cats.Semigroup
 import cats.data.NonEmptyList
-import cats.syntax.functor._
 import cats.syntax.either._
 import cats.syntax.semigroupk._
 import cats.effect.{Blocker, ExitCode, IO, IOApp}
@@ -10,11 +9,12 @@ import fs2.Stream
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
-import tapir.EndpointInput.PathCapture
-import tapir._
-import tapir.openapi.OpenAPI
-import tapir.server.http4s._
-import tapir.docs.openapi._
+import sttp.tapir.EndpointInput.PathCapture
+import sttp.tapir._
+import sttp.tapir.openapi.OpenAPI
+import sttp.tapir.server.http4s._
+import sttp.tapir.docs.openapi._
+import scala.concurrent.ExecutionContext.global
 
 object Main extends IOApp {
   val nameParam: PathCapture[String] =
@@ -53,7 +53,7 @@ object Main extends IOApp {
 
   def run(args: List[String]): IO[ExitCode] =
     Stream.resource(Blocker[IO]).flatMap { bl: Blocker =>
-      BlazeServerBuilder[IO]
+      BlazeServerBuilder[IO](global)
         .bindHttp(8080, "localhost")
         .withHttpApp(greetingService combineK SwaggerUI[IO](api, bl) orNotFound)
         .serve

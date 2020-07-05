@@ -4,14 +4,14 @@ import cats.Semigroup
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.either._
-import cats.syntax.functor._
 import cats.syntax.semigroupk._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
-import tapir._
-import tapir.server.http4s._
+import sttp.tapir._
+import sttp.tapir.server.http4s._
 import EndpointInput.PathCapture
+import scala.concurrent.ExecutionContext.global
 
 object Main3 extends IOApp {
   val nameParam: PathCapture[String] = path[String]("name")
@@ -46,7 +46,7 @@ object Main3 extends IOApp {
   ).reduce orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
+    BlazeServerBuilder[IO](global)
       .bindHttp(8080, "localhost")
       .withHttpApp(greetingService)
       .serve

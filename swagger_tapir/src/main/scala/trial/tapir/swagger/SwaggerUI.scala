@@ -6,8 +6,8 @@ import cats.effect.{Blocker, ContextShift, Sync}
 import org.http4s.{HttpRoutes, StaticFile, _}
 import org.http4s.dsl.Http4sDsl
 import org.webjars.WebJarAssetLocator
-import tapir.openapi.OpenAPI
-import tapir.openapi.circe.yaml._
+import sttp.tapir.openapi.OpenAPI
+import sttp.tapir.openapi.circe.yaml._
 
 class SwaggerUI[F[_]: Monad: Sync](
   openApi: OpenAPI, bl: Blocker

@@ -4,10 +4,10 @@ version := "0.1"
 
 scalaVersion := "2.13.1"
 
-val http4sVer     = "0.21.0-M5"
-val tapirVer      = "0.11.4"
-val circeVer      = "0.12.1"
-val catsEffectVer = "2.0.0"
+val http4sVer     = "0.21.6"
+val tapirVer      = "0.16.1"
+val circeVer      = "0.13.0"
+val catsEffectVer = "2.1.3"
 
 val commonLib = Seq(
   "org.typelevel" %% "cats-effect"         % catsEffectVer,
@@ -40,8 +40,8 @@ lazy val tapir_trial = project.in(file("tapir_trial"))
   .settings(
     scalacOptions ++= compileOptions,
     libraryDependencies ++= commonLib ++ Seq(
-      "com.softwaremill.tapir" %% "tapir-core"          % tapirVer,
-      "com.softwaremill.tapir" %% "tapir-http4s-server" % tapirVer,
+      "com.softwaremill.sttp.tapir" %% "tapir-core"          % tapirVer,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVer,
     )
   )
 lazy val swagger_tapir = project.in(file("swagger_tapir"))
@@ -49,11 +49,11 @@ lazy val swagger_tapir = project.in(file("swagger_tapir"))
  .settings(
    scalacOptions ++= compileOptions,
    libraryDependencies ++= commonLib ++ circeLib ++ Seq(
-     "com.softwaremill.tapir" %% "tapir-core"          % tapirVer,
-     "com.softwaremill.tapir" %% "tapir-http4s-server" % tapirVer,
-     "com.softwaremill.tapir" %% "tapir-json-circe"    % tapirVer,
-     "com.softwaremill.tapir" %% "tapir-openapi-docs"  % tapirVer,
-     "com.softwaremill.tapir" %% "tapir-openapi-circe-yaml" % tapirVer,
+     "com.softwaremill.sttp.tapir" %% "tapir-core"          % tapirVer,
+     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVer,
+     "com.softwaremill.sttp.tapir" %% "tapir-json-circe"    % tapirVer,
+     "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs"  % tapirVer,
+     "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % tapirVer,
      "org.webjars"            % "swagger-ui"           % "3.22.2",
      "org.webjars"            % "webjars-locator"      % "0.36"
    )
